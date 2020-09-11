@@ -471,7 +471,12 @@ class FullQKAttention(nn.Module):
 # Shared qk attention, using either full or LSH attention
 
 class LSHSelfAttention(nn.Module):
-    def __init__(self, dim, heads = 8, bucket_size = 64, n_hashes = 8, causal = False, dim_head = None, attn_chunks = 1, random_rotations_per_head = False, attend_across_buckets = True, allow_duplicate_attention = True, num_mem_kv = 0, one_value_head = False, use_full_attn = False, full_attn_thres = None, return_attn = False, post_attn_dropout = 0., dropout = 0., n_local_attn_heads = 0, **kwargs):
+    def __init__(self, dim, heads = 8, bucket_size = 64, n_hashes = 8, causal = False, 
+                 dim_head = None, attn_chunks = 1, random_rotations_per_head = False, 
+                 attend_across_buckets = True, allow_duplicate_attention = True, 
+                 num_mem_kv = 0, one_value_head = False, use_full_attn = False, 
+                 full_attn_thres = None, return_attn = False, post_attn_dropout = 0., 
+                 dropout = 0., n_local_attn_heads = 0, **kwargs):
         super().__init__()
         assert dim_head or (dim % heads) == 0, 'dimensions must be divisible by number of heads'
         assert n_local_attn_heads < heads, 'local attention heads must be less than number of heads'
@@ -633,7 +638,16 @@ class FixedPositionalEmbedding(nn.Module):
 # reformer lm
 
 class Reformer(nn.Module):
-    def __init__(self, dim, depth, max_seq_len, heads = 8, dim_head = None, bucket_size = 64, n_hashes = 8, ff_chunks = 100, attn_chunks = None, causal = False, weight_tie = False, lsh_dropout = 0., ff_dropout = 0., ff_activation = None, ff_mult = 4, ff_glu = False, post_attn_dropout = 0., layer_dropout = 0., lsh_attend_across_buckets = True, lsh_allow_duplicate_attention = True, random_rotations_per_head = False, twin_attention = False, use_scale_norm = False, use_rezero = False, use_full_attn = False, full_attn_thres = 0, reverse_thres = 0, num_mem_kv = 0, one_value_head = False, n_local_attn_heads = 0, pkm_layers = tuple(), pkm_num_keys = 128):
+    def __init__(self, dim, depth, max_seq_len, heads = 8, dim_head = None, 
+                 bucket_size = 64, n_hashes = 8, ff_chunks = 100, attn_chunks = None, 
+                 causal = False, weight_tie = False, lsh_dropout = 0., ff_dropout = 0., 
+                 ff_activation = None, ff_mult = 4, ff_glu = False, post_attn_dropout = 0., 
+                 layer_dropout = 0., lsh_attend_across_buckets = True, 
+                 lsh_allow_duplicate_attention = True, random_rotations_per_head = False, 
+                 twin_attention = False, use_scale_norm = False, use_rezero = False, 
+                 use_full_attn = False, full_attn_thres = 0, reverse_thres = 0, 
+                 num_mem_kv = 0, one_value_head = False, n_local_attn_heads = 0, 
+                 pkm_layers = tuple(), pkm_num_keys = 128):
         super().__init__()
         self.dim = dim
         self.depth = depth
@@ -644,8 +658,23 @@ class Reformer(nn.Module):
         self.twin_attention = twin_attention
         self.full_attn_thres = full_attn_thres
 
-        get_attn = lambda: LSHSelfAttention(dim, heads, bucket_size, n_hashes, causal = causal, dim_head = dim_head, dropout = lsh_dropout, post_attn_dropout = post_attn_dropout, attn_chunks = attn_chunks, allow_duplicate_attention = lsh_allow_duplicate_attention, attend_across_buckets = lsh_attend_across_buckets, random_rotations_per_head = random_rotations_per_head, num_mem_kv = num_mem_kv, use_full_attn = use_full_attn, full_attn_thres = full_attn_thres, one_value_head = one_value_head, n_local_attn_heads = n_local_attn_heads)
-        get_ff = lambda: Chunk(ff_chunks, FeedForward(dim, dropout = ff_dropout, activation = ff_activation, mult = ff_mult, glu = ff_glu), along_dim = -2)
+        get_attn = lambda: LSHSelfAttention(dim, heads, bucket_size, n_hashes, 
+                                            causal = causal, dim_head = dim_head, 
+                                            dropout = lsh_dropout, 
+                                            post_attn_dropout = post_attn_dropout, 
+                                            attn_chunks = attn_chunks, 
+                                            allow_duplicate_attention = lsh_allow_duplicate_attention, 
+                                            attend_across_buckets = lsh_attend_across_buckets, 
+                                            random_rotations_per_head = random_rotations_per_head, 
+                                            num_mem_kv = num_mem_kv, 
+                                            use_full_attn = use_full_attn, 
+                                            full_attn_thres = full_attn_thres, 
+                                            one_value_head = one_value_head, 
+                                            n_local_attn_heads = n_local_attn_heads)
+        get_ff = lambda: Chunk(ff_chunks, FeedForward(dim, dropout = ff_dropout, 
+                                                      activation = ff_activation, 
+                                                      mult = ff_mult, glu = ff_glu), 
+                               along_dim = -2)
         get_pkm = lambda: PKM(dim, num_keys = pkm_num_keys)
 
         if weight_tie:
