@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.cuda.amp import autocast, custom_fwd, custom_bwd
 from torch.autograd.function import Function
 from torch.utils.checkpoint import get_device_states, set_device_states
 
@@ -117,6 +118,7 @@ class IrreversibleBlock(nn.Module):
 
 class _ReversibleFunction(Function):
     @staticmethod
+    @custom_fwd
     def forward(ctx, x, blocks, kwargs):
         ctx.kwargs = kwargs
         for block in blocks:
@@ -126,6 +128,7 @@ class _ReversibleFunction(Function):
         return x
 
     @staticmethod
+    @custom_bwd
     def backward(ctx, dy):
         y = ctx.y
         kwargs = ctx.kwargs
